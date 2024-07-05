@@ -1,1 +1,3 @@
 # image_recognization
+
+このコードはmanage_receiptの画像認識アルゴリズムを作成したものである
