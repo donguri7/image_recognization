@@ -66,9 +66,6 @@ def extract_product_names(text):
             cleaned_products.append(name)
             
     return cleaned_products
-        
-            
-    return product_names
 
 image_path = '/Users/takumi.i/Desktop/画像認識/mandai.jpeg'
 

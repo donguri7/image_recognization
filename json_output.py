@@ -28,10 +28,10 @@ def extract_lines(text):
     return [line.strip() for line in text.split('\n') if line.strip()] # 空の行、各行の先頭と末尾の空白文字を削除、テキストを改行文字で分割
 
 # 画像ファイルのパス
-image_path = '/Users/takumi.i/Desktop/画像認識/Images/mandai2.jpeg'
+image_path = '/Users/takumi.i/Desktop/image_recog/Images/mandai2.jpeg'
 
 # 出力JSONファイルのパスを生成
-output_path = os.path.splitext(image_path.replace('/Images', ''))[0] + '.json'
+output_path = os.path.splitext(image_path.replace('/Images', '/Raws'))[0] +'.json'
 
 response = detect_text(image_path)
 
