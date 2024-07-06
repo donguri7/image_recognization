@@ -1,5 +1,6 @@
 import json
-import re, os
+import re
+import os
 
 def clean_item_name(item):
     # 価格、数量、その他の不要な情報を削除
@@ -27,8 +28,13 @@ def normalize_item_name(item):
 def extract_items_mandai(lines):
     items = []
     for line in lines:
-        if '#' in line or line.startswith('リ#') or line.startswith('F:'):
+        if '#' in line or line.startswith('リ#') or line.startswith('F:') or '#' in line:
             item = clean_item_name(line)
+            # '#' と数字を削除
+            item = re.sub(r'^#?\d+\s*', '', item)
+            if '#' in line:
+                item = re.sub(r'\s', '', item)
+                item = re.sub(r'#\d+', '', item)
             if is_valid_item(item):
                 items.append(normalize_item_name(item))
     return items
@@ -37,7 +43,7 @@ def extract_items_711(lines):
     items = []
     start_extracting = False
     skip_next = False
-    for line in lines:
+    for i, line in enumerate(lines):
         if '領収書' in line or '領収証' in line:
             start_extracting = True
             continue
@@ -53,11 +59,17 @@ def extract_items_711(lines):
             item = clean_item_name(line)
             if is_valid_item(item):
                 items.append(normalize_item_name(item))
+            # 次の行も確認して、商品名が2行に分かれている可能性を考慮
+            if i + 1 < len(lines):
+                next_line = lines[i + 1]
+                if not next_line.startswith('(') and not next_line.isdigit() and '¥' not in next_line and ':' not in next_line:
+                    combined_item = item + ' ' + clean_item_name(next_line)
+                    if is_valid_item(combined_item):
+                        items.append(normalize_item_name(combined_item))
         if '合計' in line:
             break
     return items
 
-# 以下のコードは変更なし
 def extract_items(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
@@ -70,6 +82,7 @@ def extract_items(file_path):
         return []
     
 def main():
+    # 入力ファイルのディレクトリを "Raws" に変更
     input_dir = "Raws"
     files = ['mandai.json', 'mandai2.json', '711_2.json', '711.json']
     all_items = []
@@ -92,10 +105,10 @@ def main():
     # 結果をJSONファイルに保存（"Outputs" ディレクトリ内）
     output_file = os.path.join(output_dir, 'extracted_items.json')
     output = {"商品名": unique_items}
-    with open('extracted_items.json', 'w', encoding='utf-8') as f:
+    with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
         
-    print("\n全ての商品名を '{output_file}' に保存しました。")
+    print(f"\n全ての商品名を '{output_file}' に保存しました。")
     print(f"抽出された商品数: {len(unique_items)}")
     
 if __name__ == "__main__":
